@@ -5,19 +5,21 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
+  const isCI = process.env.CI === 'true';
+
   return {
     base: './',
     plugins: [
       react(), 
       tailwindcss(),
-      VitePWA({
+      !isCI && VitePWA({
         selfDestroying: true,
         registerType: 'autoUpdate',
         includeAssets: ['logo.svg', 'favicon.png', 'icon.png', 'logo.png', 'apple-touch-icon.png'],
         manifest: {
-          name: 'ER4 App - German Teacher Management',
-          short_name: 'ER4 App',
-          description: 'German teacher management application',
+          name: 'AGS19 Teacher App',
+          short_name: 'AGS19',
+          description: 'Teacher management application',
           theme_color: '#ffffff',
           icons: [
             {
@@ -51,36 +53,17 @@ export default defineConfig(() => {
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,ttf}'],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            }
-          ]
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,ttf}']
         }
       })
-    ],
+    ].filter(Boolean),
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };
